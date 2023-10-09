@@ -27,6 +27,7 @@ def update_user_data(user, previous_state):
     return user
 
 previous_state = {} 
+deleted_users = set()
 
 def fetch_and_update_data():
     offset = 0
@@ -40,6 +41,8 @@ def fetch_and_update_data():
             break
 
         for d in data:
+            if d['userId'] in deleted_users:
+                continue
             user = { 'userId': d['userId'], 'isOnline': d['isOnline'], 'lastSeenDate': d['lastSeenDate'] }
             updated_user = update_user_data(user, previous_state)
             user['totalSecondsOnline'] = calculate_online_time(user)
@@ -87,6 +90,7 @@ def delete_user_data(user_id):
     all_data = [user for user in all_data if user['userId'] != user_id]
     with open('all_data.json', 'w') as f:
         json.dump(all_data, f)
+    deleted_users.add(user_id)
 
 
 if __name__ == "__main__":
