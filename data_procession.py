@@ -81,6 +81,13 @@ def calculate_average_times(user):
     weekly_average = daily_average * 7
     return weekly_average, daily_average
 
+def delete_user_data(user_id):
+    with open('all_data.json', 'r') as f:
+        all_data = json.load(f)
+    all_data = [user for user in all_data if user['userId'] != user_id]
+    with open('all_data.json', 'w') as f:
+        json.dump(all_data, f)
+
 
 if __name__ == "__main__":
     while True:
