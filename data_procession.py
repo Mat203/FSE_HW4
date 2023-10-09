@@ -42,7 +42,7 @@ def fetch_and_update_data():
         for d in data:
             user = { 'userId': d['userId'], 'isOnline': d['isOnline'], 'lastSeenDate': d['lastSeenDate'] }
             updated_user = update_user_data(user, previous_state)
-
+            user['totalSecondsOnline'] = calculate_online_time(user)
 
             if updated_user['userId'] not in [user['userId'] for user in all_data]:
                 all_data.append(updated_user)
@@ -55,7 +55,14 @@ def fetch_and_update_data():
 
     with open('all_data.json', 'w') as f:
         json.dump(all_data, f)
-
+        
+def calculate_online_time(user):
+    total_seconds_online = 0
+    for period in user['onlinePeriods']:
+        start_time = parse(period[0])
+        end_time = parse(period[1]) if period[1] else datetime.now()
+        total_seconds_online += (end_time - start_time).total_seconds()
+    return total_seconds_online
 
 
 if __name__ == "__main__":
