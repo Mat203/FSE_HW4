@@ -55,7 +55,7 @@ def fetch_and_update_data():
 
     with open('all_data.json', 'w') as f:
         json.dump(all_data, f)
-        
+
 def calculate_online_time(user):
     total_seconds_online = 0
     for period in user['onlinePeriods']:
@@ -63,6 +63,23 @@ def calculate_online_time(user):
         end_time = parse(period[1]) if period[1] else datetime.now()
         total_seconds_online += (end_time - start_time).total_seconds()
     return total_seconds_online
+
+def calculate_days(user):
+    periods = user['onlinePeriods']
+    if not periods:
+        return 0
+    start_date = parse(periods[0][0]).date()
+    end_date = parse(periods[-1][-1]).date() if periods[-1][-1] else datetime.now().date()
+    return (end_date - start_date).days + 1
+
+def calculate_average_times(user):
+    days = calculate_days(user)
+    if days == 0:
+        return 0, 0
+    total_seconds_online = calculate_online_time(user)
+    daily_average = total_seconds_online / days
+    weekly_average = daily_average * 7
+    return weekly_average, daily_average
 
 
 if __name__ == "__main__":
