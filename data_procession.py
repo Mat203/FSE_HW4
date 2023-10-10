@@ -39,7 +39,7 @@ def fetch_and_update_data():
 
         if not data or counter > 1000: 
             break
-
+        
         for d in data:
             if d['userId'] in deleted_users:
                 continue
@@ -91,6 +91,8 @@ def delete_user_data(user_id):
     with open('all_data.json', 'w') as f:
         json.dump(all_data, f)
     deleted_users.add(user_id)
+    if user_id in previous_state:
+        del previous_state[user_id]
 
 
 if __name__ == "__main__":
