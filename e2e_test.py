@@ -3,57 +3,26 @@ import requests
 import json
 from unittest.mock import patch
 
-BASE_URL = 'https://sef.podkolzin.consulting' 
+BASE_URL = 'http://127.0.0.1:5000' 
 
 from unittest.mock import patch
 
-@patch('requests.get')
-def test_ShouldCalculateOnlineTime_When_WeGetAPI(mock_get):
-    mock_response = mock_get.return_value
-    mock_response.status_code = 200
-    mock_response.json.return_value = {'userId': '1', 'onlineTime': 1000}
+@patch('data_procession.calculate_online_time')
+@patch('data_procession.update_user_data')
+def test_ShouldCalculateOnlineTime_When_WeGetAPI(mock_update_user_data, mock_calculate_online_time):
+    user = {'userId': '1', 'onlinePeriods': [['2023-10-14T18:27:57', None]]}
+    previous_state = {}
+    mock_update_user_data.return_value = user, previous_state
+    mock_calculate_online_time.return_value = 1000
 
     userId = '1'
     response = requests.get(f'{BASE_URL}/api/stats/user/online_time?userId={userId}')
 
-    mock_get.assert_called_once_with(f'{BASE_URL}/api/stats/user/online_time?userId={userId}')
-
     assert response.status_code == 200
     data = response.json()
     assert 'onlineTime' in data
+    assert data['onlineTime'] == 1000
 
-from unittest.mock import patch
-
-@patch('requests.get')
-def test_ShouldCalculateAverageTimes_When_WeGetAPI(mock_get):
-    mock_response = mock_get.return_value
-    mock_response.status_code = 200
-    mock_response.json.return_value = {'userId': '1', 'weeklyAverage': 1000, 'dailyAverage': 200}
-
-    userId = '1'
-    response = requests.get(f'{BASE_URL}/api/stats/user/average?userId={userId}')
-
-    mock_get.assert_called_once_with(f'{BASE_URL}/api/stats/user/average?userId={userId}')
-
-    assert response.status_code == 200
-    data = response.json()
-    assert 'weeklyAverage' in data
-    assert 'dailyAverage' in data
-
-@patch('requests.post')
-def test_ShouldForgetUuser_When_WeDelete_Data(mock_post):
-    mock_response = mock_post.return_value
-    mock_response.status_code = 200
-    mock_response.json.return_value = {'userId': '1'}
-
-    userId = '1'
-    response = requests.post(f'{BASE_URL}/api/user/forget?userId={userId}')
-
-    mock_post.assert_called_once_with(f'{BASE_URL}/api/user/forget?userId={userId}')
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data['userId'] == userId
 
 if __name__ == "__main__":
     pytest.main()

@@ -6,8 +6,10 @@ app = Flask(__name__)
 
 @app.route('/api/stats/user/online_time', methods=['GET'])
 def get_online_time():
+    data_procession.fetch_and_update_data()
     userId = request.args.get('userId')
-    user_data = data_procession.get_user_data(userId)
+    previous_state = {}
+    user_data = data_procession.update_user_data(userId, previous_state)
     
     if user_data is None:
         return jsonify({'error': 'Invalid userId'}), 404
@@ -17,8 +19,9 @@ def get_online_time():
 
 @app.route('/api/stats/user/average', methods=['GET'])
 def get_average_times():
+    data_procession.fetch_and_update_data()
     userId = request.args.get('userId')
-    user_data = data_procession.get_user_data(userId)
+    user_data = data_procession.update_user_data(userId)
     
     if user_data is None:
         return jsonify({'error': 'Invalid userId'}), 404
@@ -28,6 +31,10 @@ def get_average_times():
 
 @app.route('/api/user/forget', methods=['POST'])
 def forget_user():
+    data_procession.fetch_and_update_data()
     userId = request.args.get('userId')
     data_procession.delete_user_data(userId)
     return jsonify({'userId': userId})
+
+if __name__ == "__main__":
+    app.run(debug=True)
